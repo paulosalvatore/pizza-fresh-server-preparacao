@@ -8,7 +8,7 @@ export class AppController {
 
   @Get()
   getAppStatus(@Req() req: Request): string {
-    const fullUrl = req.protocol + '://' + req.get('host');
+    const fullUrl = req.protocol + '://' + req.get('host'); // http://localhost:3333
     return this.appService.getAppStatus(fullUrl);
   }
 }
