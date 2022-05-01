@@ -14,7 +14,8 @@ async function bootstrap() {
     .setTitle('PizzaFresh')
     .setDescription('Aplicação para gestão das mesas de uma pizzaria')
     .setVersion('1.0.0')
-    .addTag('pizzafresh')
+    .addTag('status')
+    .addTag('table')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
