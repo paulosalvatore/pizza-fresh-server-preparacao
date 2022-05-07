@@ -20,17 +20,23 @@ export class TableService {
   create(dto: CreateTableDto): Promise<Table> {
     const data: Table = { ...dto };
 
-    return this.prisma.table.create({ data });
+    return this.prisma.table.create({ data }).catch(this.handleError);
   }
 
-  findOne(id: string): Promise<Table> {
-    return this.prisma.table.findUnique({ where: { id } });
+  async findOne(id: string): Promise<Table> {
+    const record = await this.prisma.table.findUnique({ where: { id } });
+
+    if (!record) {
+      throw new NotFoundException(`ID ${id} não encontrado.`);
+    }
+
+    return record;
   }
 
   async update(id: string, dto: UpdateTableDto): Promise<Table> {
-    const isRecordFound = await this.prisma.table.findUnique({ where: { id } });
+    const record = await this.prisma.table.findUnique({ where: { id } });
 
-    if (!isRecordFound) {
+    if (!record) {
       throw new NotFoundException(`ID ${id} não encontrado.`);
     }
 
@@ -41,11 +47,7 @@ export class TableService {
         where: { id },
         data,
       })
-      .catch((error) => {
-        const errorLines = error.message?.split('\n');
-        const lastErrorLine = errorLines[errorLines.length - 1].trim();
-        throw new UnprocessableEntityException(lastErrorLine);
-      });
+      .catch(this.handleError);
   }
 
   async delete(id: string) {
@@ -56,5 +58,11 @@ export class TableService {
     }
 
     return this.prisma.table.delete({ where: { id } });
+  }
+
+  handleError(error: Error): undefined {
+    const errorLines = error.message?.split('\n');
+    const lastErrorLine = errorLines[errorLines.length - 1].trim();
+    throw new UnprocessableEntityException(lastErrorLine);
   }
 }
