@@ -1,6 +1,18 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateTableDto } from './dto/create-table.dto';
+import { UpdateTableDto } from './dto/update-table.dto';
+import { Table } from './entities/table.entity';
 import { TableService } from './table.service';
 
 @ApiTags('table')
@@ -12,15 +24,40 @@ export class TableController {
   @ApiOperation({
     summary: 'Listar todas as mesas',
   })
-  findAll() {
+  findAll(): Promise<Table[]> {
     return this.tableService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Visualizar uma mesa',
+  })
+  findOne(@Param('id') id: string): Promise<Table> {
+    return this.tableService.findOne(id);
   }
 
   @Post()
   @ApiOperation({
     summary: 'Criar uma mesa',
   })
-  create(@Body() createTableDto: CreateTableDto) {
-    return this.tableService.create(createTableDto);
+  create(@Body() dto: CreateTableDto): Promise<Table> {
+    return this.tableService.create(dto);
+  }
+
+  @Patch(':id')
+  @ApiOperation({
+    summary: 'Editar uma mesa',
+  })
+  update(@Param('id') id: string, @Body() dto: UpdateTableDto): Promise<Table> {
+    return this.tableService.update(id, dto);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  @ApiOperation({
+    summary: 'Exclui uma mesa',
+  })
+  async delete(@Param('id') id: string): Promise<void> {
+    this.tableService.delete(id);
   }
 }
