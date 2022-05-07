@@ -55,7 +55,7 @@ export class TableController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   @ApiOperation({
-    summary: 'Exclui uma mesa',
+    summary: 'Excluir uma mesa',
   })
   async delete(@Param('id') id: string): Promise<void> {
     this.tableService.delete(id);
