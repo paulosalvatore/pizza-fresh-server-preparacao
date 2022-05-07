@@ -51,20 +51,38 @@ export class UserService {
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
+    if (dto.password) {
+      if (dto.password != dto.confirmPassword) {
+        throw new BadRequestException('Senhas informadas não são iguais.');
+      }
+    }
+
+    delete dto.confirmPassword;
+
+    const data: Partial<User> = {
+      ...dto,
+    };
+
+    if (data.password) {
+      data.password = await bcrypt.hash(dto.password, 10);
+    }
+
     const record = await this.prisma.user.findUnique({ where: { id } });
 
     if (!record) {
       throw new NotFoundException(`ID ${id} não encontrado.`);
     }
 
-    const data: Partial<User> = { ...dto };
-
-    return this.prisma.user
+    const updatedUser = await this.prisma.user
       .update({
         where: { id },
         data,
       })
       .catch(this.handleError);
+
+    delete updatedUser.password;
+
+    return updatedUser;
   }
 
   async delete(id: string) {
