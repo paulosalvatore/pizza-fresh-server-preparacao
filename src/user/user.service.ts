@@ -12,10 +12,22 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
+  private userSelect = {
+    id: true,
+    nickname: true,
+    password: false,
+    name: true,
+    image: true,
+    createdAt: true,
+    updatedAt: true,
+  };
+
   constructor(private readonly prisma: PrismaService) {}
 
   findAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      select: this.userSelect,
+    });
   }
 
   async create(dto: CreateUserDto): Promise<User> {
@@ -30,18 +42,16 @@ export class UserService {
       password: await bcrypt.hash(dto.password, 10),
     };
 
-    const createdUser = await this.prisma.user
-      .create({ data })
+    return this.prisma.user
+      .create({ data, select: this.userSelect })
       .catch(this.handleError);
-
-    return {
-      ...createdUser,
-      password: undefined,
-    };
   }
 
   async findOne(id: string): Promise<User> {
-    const record = await this.prisma.user.findUnique({ where: { id } });
+    const record = await this.prisma.user.findUnique({
+      where: { id },
+      select: this.userSelect,
+    });
 
     if (!record) {
       throw new NotFoundException(`ID ${id} não encontrado.`);
@@ -67,22 +77,22 @@ export class UserService {
       data.password = await bcrypt.hash(dto.password, 10);
     }
 
-    const record = await this.prisma.user.findUnique({ where: { id } });
+    const record = await this.prisma.user.findUnique({
+      where: { id },
+      select: this.userSelect,
+    });
 
     if (!record) {
       throw new NotFoundException(`ID ${id} não encontrado.`);
     }
 
-    const updatedUser = await this.prisma.user
+    return this.prisma.user
       .update({
         where: { id },
         data,
+        select: this.userSelect,
       })
       .catch(this.handleError);
-
-    delete updatedUser.password;
-
-    return updatedUser;
   }
 
   async delete(id: string) {
@@ -92,7 +102,10 @@ export class UserService {
       throw new NotFoundException(`ID ${id} não encontrado.`);
     }
 
-    return this.prisma.user.delete({ where: { id } });
+    return this.prisma.user.delete({
+      where: { id },
+      select: this.userSelect,
+    });
   }
 
   handleError(error: Error): undefined {
