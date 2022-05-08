@@ -32,28 +32,4 @@ export class OrderController {
   findOne(@Param('id') id: string) {
     return this.orderService.findOne(id);
   }
-
-  @Patch(':id/add-item')
-  addItem(
-    @Param('id') id: string,
-    @Body() changeItemOrderDto: ChangeItemOrderDto,
-  ) {
-    return this.orderService.addItem(id, changeItemOrderDto);
-  }
-
-  @Patch(':id/remove-item')
-  removeItem(
-    @Param('id') id: string,
-    @Body() changeItemOrderDto: ChangeItemOrderDto,
-  ) {
-    return this.orderService.removeItem(id, changeItemOrderDto);
-  }
-
-  @Patch('close-order/:id')
-  @ApiOperation({
-    summary: 'Fechar um pedido',
-  })
-  closeOrder(@Param('id') id: string) {
-    return this.orderService.closeOrder(id);
-  }
 }

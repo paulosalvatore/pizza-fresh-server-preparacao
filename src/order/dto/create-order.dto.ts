@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsPositive, IsString, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsNumber,
+  IsPositive,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
+import { CreateOrderProductDto } from './create-order-product.dto';
 
 export class CreateOrderDto {
   @IsUUID()
@@ -16,4 +24,10 @@ export class CreateOrderDto {
     example: 1,
   })
   tableNumber: number;
+
+  @ValidateNested({
+    each: true,
+  })
+  @Type(() => CreateOrderProductDto)
+  products: CreateOrderProductDto[];
 }

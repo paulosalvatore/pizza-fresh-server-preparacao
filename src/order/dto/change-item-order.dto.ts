@@ -7,6 +7,8 @@ export class ChangeItemOrderDto {
   @IsUUID(undefined, {
     each: true,
   })
-  @ApiProperty()
+  @ApiProperty({
+    example: '["abbb7373-c58c-4c14-bd06-c7ae0a703ea7"]',
+  })
   productsIds: string[];
 }
