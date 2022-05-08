@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ChangeItemOrderDto } from './dto/change-item-order.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { ChangeItemOrderDto } from './dto/update-order.dto';
 import { OrderService } from './order.service';
 
 @ApiTags('order')
