@@ -1,8 +1,7 @@
-import { Product, Status } from '@prisma/client';
+import { Product } from 'src/product/entities/product.entity';
 
 export class Order {
   id?: string;
-  status: Status;
   userId: string;
   tableId: string;
   createdAt?: Date;

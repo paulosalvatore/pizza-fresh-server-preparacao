@@ -1,11 +1,10 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { Prisma, Status } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { handleError } from 'src/utils/handle-error.util';
 import { ChangeItemOrderDto } from './dto/change-item-order.dto';
@@ -27,18 +26,11 @@ export class OrderService {
     }
 
     const isTableFound = await this.prisma.table.count({
-      where: {
-        number: dto.tableNumber,
-        orders: {
-          none: { status: Status.OPEN },
-        },
-      },
+      where: { number: dto.tableNumber },
     });
 
     if (!isTableFound) {
-      throw new ForbiddenException(
-        'Mesa não existe ou já possui um pedido aberto no momento.',
-      );
+      throw new ForbiddenException('Mesa não existe.');
     }
 
     const data: Prisma.OrderCreateInput = {
@@ -50,6 +42,15 @@ export class OrderService {
       table: {
         connect: {
           number: dto.tableNumber,
+        },
+      },
+      orderProducts: {
+        createMany: {
+          data: dto.products.map((product) => ({
+            productId: product.productId,
+            quantity: product.quantity,
+            description: product.description,
+          })),
         },
       },
     };
@@ -69,92 +70,5 @@ export class OrderService {
     }
 
     return record;
-  }
-
-  private async canOrderBeProcessed(id: string) {
-    const order = await this.prisma.order.findUnique({
-      where: { id },
-      select: { status: true },
-    });
-
-    if (!order) {
-      throw new NotFoundException(`Pedido não encontrado.`);
-    }
-
-    if (order.status === Status.CLOSED) {
-      throw new UnprocessableEntityException('Pedido está fechado.');
-    }
-  }
-
-  private getOrderTotal(order) {
-    return order.products.reduce((prev, curr) => prev + curr.price, 0);
-  }
-
-  private async changeOrderItems(
-    action: 'add' | 'remove',
-    id: string,
-    changeItemOrderDto: ChangeItemOrderDto,
-  ) {
-    await this.canOrderBeProcessed(id);
-
-    // Etapa 1
-    // const productsIds = changeItemOrderDto.productsIds.map((productId) => {
-    //   const object: Prisma.ProductWhereUniqueInput = {
-    //     id: productId,
-    //   };
-
-    //   return object;
-    // });
-
-    const productsIds: Prisma.ProductWhereUniqueInput[] =
-      changeItemOrderDto.productsIds.map((productId) => ({
-        id: productId,
-      }));
-
-    // Etapa 2
-    const products: Prisma.ProductUpdateManyWithoutOrdersInput = {};
-
-    if (action === 'add') {
-      products.connect = productsIds;
-    } else if (action === 'remove') {
-      products.disconnect = productsIds;
-    }
-
-    const data: Prisma.OrderUpdateInput = { products };
-
-    const order = await this.prisma.order.update({
-      where: { id },
-      data,
-      include: { products: true },
-    });
-
-    const orderTotal = this.getOrderTotal(order);
-
-    return {
-      order,
-      orderTotal,
-    };
-  }
-
-  addItem(
-    id: string,
-    changeItemOrderDto: ChangeItemOrderDto,
-  ): Promise<OrderChangedDto> {
-    return this.changeOrderItems('add', id, changeItemOrderDto);
-  }
-
-  removeItem(id: string, changeItemOrderDto: ChangeItemOrderDto) {
-    return this.changeOrderItems('remove', id, changeItemOrderDto);
-  }
-
-  async closeOrder(id: string) {
-    await this.canOrderBeProcessed(id);
-
-    return this.prisma.order.update({
-      where: { id },
-      data: {
-        status: Status.CLOSED,
-      },
-    });
   }
 }
