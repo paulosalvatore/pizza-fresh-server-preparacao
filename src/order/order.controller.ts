@@ -33,7 +33,7 @@ export class OrderController {
     return this.orderService.findOne(id);
   }
 
-  @Get(':id/add-item')
+  @Patch(':id/add-item')
   addItem(
     @Param('id') id: string,
     @Body() changeItemOrderDto: ChangeItemOrderDto,
@@ -41,7 +41,7 @@ export class OrderController {
     return this.orderService.addItem(id, changeItemOrderDto);
   }
 
-  @Get(':id/remove-item')
+  @Patch(':id/remove-item')
   removeItem(
     @Param('id') id: string,
     @Body() changeItemOrderDto: ChangeItemOrderDto,
