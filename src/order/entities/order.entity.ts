@@ -1,4 +1,4 @@
-import { Status } from './status.enum';
+import { Product, Status } from '@prisma/client';
 
 export class Order {
   id?: string;
@@ -7,4 +7,5 @@ export class Order {
   tableId: string;
   createdAt?: Date;
   updatedAt?: Date;
+  products?: Product[];
 }

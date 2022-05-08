@@ -13,5 +13,5 @@ export class ChangeItemOrderDto {
     each: true,
   })
   @ApiProperty()
-  productsId: string[];
+  productsIds: string[];
 }
