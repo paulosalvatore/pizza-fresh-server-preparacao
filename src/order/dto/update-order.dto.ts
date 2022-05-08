@@ -1,4 +1,17 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateOrderDto } from './create-order.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {}
+export class ChangeItemOrderDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  orderId: string;
+
+  @IsArray()
+  @IsNotEmpty()
+  @IsUUID(undefined, {
+    each: true,
+  })
+  @ApiProperty()
+  productsId: string[];
+}

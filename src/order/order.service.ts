@@ -1,26 +1,66 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { handleError } from 'src/utils/handle-error.util';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { ChangeItemOrderDto } from './dto/update-order.dto';
+import { Status } from './entities/status.enum';
 
 @Injectable()
 export class OrderService {
-  create(createOrderDto: CreateOrderDto) {
-    return 'This action adds a new order';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(dto: CreateOrderDto) {
+    const isUserFound = await this.prisma.user.count({
+      where: { id: dto.userId },
+    });
+
+    if (!isUserFound) {
+      throw new NotFoundException('Usuário não existe.');
+    }
+
+    const isTableFound = await this.prisma.table.count({
+      where: {
+        number: dto.tableNumber,
+        orders: {
+          none: { status: Status.OPEN },
+        },
+      },
+    });
+
+    if (!isTableFound) {
+      throw new ForbiddenException(
+        'Mesa não existe ou já possui um pedido aberto no momento.',
+      );
+    }
+
+    const data: Prisma.OrderCreateInput = {
+      user: {
+        connect: {
+          id: dto.userId,
+        },
+      },
+      table: {
+        connect: {
+          number: dto.tableNumber,
+        },
+      },
+    };
+
+    return this.prisma.order.create({ data }).catch(handleError);
   }
 
-  findAll() {
-    return `This action returns all order`;
-  }
+  findAll() {}
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
-  }
+  findOne(id: string) {}
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
-  }
+  removeItem(id: string, changeItemOrderDto: ChangeItemOrderDto) {}
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
-  }
+  addItem(id: string, changeItemOrderDto: ChangeItemOrderDto) {}
+
+  closeOrder(id: string) {}
 }
