@@ -86,33 +86,41 @@ export class OrderService {
     }
   }
 
-  async addItem(
+  private getOrderTotal(order) {
+    return order.products.reduce((prev, curr) => prev + curr.price, 0);
+  }
+
+  private async changeOrderItems(
+    action: 'add' | 'remove',
     id: string,
     changeItemOrderDto: ChangeItemOrderDto,
-  ): Promise<OrderChangedDto> {
+  ) {
     await this.canOrderBeProcessed(id);
 
     // Etapa 1
-    // const products: Prisma.ProductUpdateManyWithoutOrdersInput = {
-    //   connect: changeItemOrderDto.productsIds.map((productId) => {
-    //     const object: Prisma.ProductWhereUniqueInput = {
-    //       id: productId,
-    //     };
+    // const productsIds = changeItemOrderDto.productsIds.map((productId) => {
+    //   const object: Prisma.ProductWhereUniqueInput = {
+    //     id: productId,
+    //   };
 
-    //     return object;
-    //   }),
-    // };
+    //   return object;
+    // });
+
+    const productsIds: Prisma.ProductWhereUniqueInput[] =
+      changeItemOrderDto.productsIds.map((productId) => ({
+        id: productId,
+      }));
 
     // Etapa 2
-    const products: Prisma.ProductUpdateManyWithoutOrdersInput = {
-      connect: changeItemOrderDto.productsIds.map((productId) => ({
-        id: productId,
-      })),
-    };
+    const products: Prisma.ProductUpdateManyWithoutOrdersInput = {};
 
-    const data: Prisma.OrderUpdateInput = {
-      products,
-    };
+    if (action === 'add') {
+      products.connect = productsIds;
+    } else if (action === 'remove') {
+      products.disconnect = productsIds;
+    }
+
+    const data: Prisma.OrderUpdateInput = { products };
 
     const order = await this.prisma.order.update({
       where: { id },
@@ -120,10 +128,7 @@ export class OrderService {
       include: { products: true },
     });
 
-    const orderTotal = order.products.reduce(
-      (prev, curr) => prev + curr.price,
-      0,
-    );
+    const orderTotal = this.getOrderTotal(order);
 
     return {
       order,
@@ -131,7 +136,25 @@ export class OrderService {
     };
   }
 
-  removeItem(id: string, changeItemOrderDto: ChangeItemOrderDto) {}
+  addItem(
+    id: string,
+    changeItemOrderDto: ChangeItemOrderDto,
+  ): Promise<OrderChangedDto> {
+    return this.changeOrderItems('add', id, changeItemOrderDto);
+  }
 
-  closeOrder(id: string) {}
+  removeItem(id: string, changeItemOrderDto: ChangeItemOrderDto) {
+    return this.changeOrderItems('remove', id, changeItemOrderDto);
+  }
+
+  async closeOrder(id: string) {
+    await this.canOrderBeProcessed(id);
+
+    return this.prisma.order.update({
+      where: { id },
+      data: {
+        status: Status.CLOSED,
+      },
+    });
+  }
 }
