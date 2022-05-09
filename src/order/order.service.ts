@@ -2,14 +2,11 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-  UnprocessableEntityException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { handleError } from 'src/utils/handle-error.util';
-import { ChangeItemOrderDto } from './dto/change-item-order.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { OrderChangedDto } from './dto/order-changed.dto';
 import { Order } from './entities/order.entity';
 
 @Injectable()
