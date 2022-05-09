@@ -72,11 +72,11 @@ model Order {
 model OrderProduct {
   id String @id @default(uuid())
 
-  Order   Order  @relation(fields: [orderId], references: [id])
-  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+  orderId String
 
   product   Product @relation(fields: [productId], references: [id])
-  productId String  @unique
+  productId String
 
   quantity    Int
   description String
@@ -84,5 +84,6 @@ model OrderProduct {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([orderId, productId])
   @@map("order_product")
 }
