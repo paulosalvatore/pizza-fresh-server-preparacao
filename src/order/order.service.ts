@@ -63,12 +63,59 @@ export class OrderService {
       .catch(handleError);
   }
 
-  findAll(): Promise<Order[]> {
-    return this.prisma.order.findMany();
+  findAll() {
+    return this.prisma.order.findMany({
+      select: {
+        id: true,
+        table: {
+          select: {
+            number: true,
+          },
+        },
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            orderProducts: true,
+          },
+        },
+      },
+    });
   }
 
-  async findOne(id: string): Promise<Order> {
-    const record = await this.prisma.order.findUnique({ where: { id } });
+  async findOne(id: string) {
+    const record = await this.prisma.order.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        table: {
+          select: {
+            number: true,
+          },
+        },
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        orderProducts: {
+          select: {
+            quantity: true,
+            description: true,
+            product: {
+              select: {
+                name: true,
+                image: true,
+                price: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
     if (!record) {
       throw new NotFoundException(`ID ${id} não encontrado.`);
