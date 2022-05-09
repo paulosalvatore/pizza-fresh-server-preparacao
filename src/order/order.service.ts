@@ -55,7 +55,15 @@ export class OrderService {
       },
     };
 
-    return this.prisma.order.create({ data }).catch(handleError);
+    return this.prisma.order
+      .create({
+        data,
+        include: {
+          table: true,
+          orderProducts: true,
+        },
+      })
+      .catch(handleError);
   }
 
   findAll(): Promise<Order[]> {
