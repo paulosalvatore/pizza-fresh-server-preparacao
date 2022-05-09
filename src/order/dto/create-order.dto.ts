@@ -7,7 +7,7 @@ export class CreateOrderDto {
   @IsUUID()
   @ApiProperty({
     description: 'ID do Usuário',
-    example: 'ca7b81d4-b6fb-4e9c-a7f2-3d150cc385dd',
+    example: '3eb54f96-136c-449e-b8d2-3a2463bf838b',
   })
   userId: string;
 
@@ -23,5 +23,10 @@ export class CreateOrderDto {
     each: true,
   })
   @Type(() => CreateOrderProductDto)
+  @ApiProperty({
+    description:
+      'Lista de produtos no pedido, incluindo quantidade e observações',
+    type: [CreateOrderProductDto],
+  })
   products: CreateOrderProductDto[];
 }
