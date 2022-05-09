@@ -11,7 +11,7 @@ export class OrderController {
 
   @Post()
   @ApiOperation({
-    summary: 'Criar uma ordem',
+    summary: 'Criar um pedido',
   })
   create(@Body() createOrderDto: CreateOrderDto) {
     return this.orderService.create(createOrderDto);
@@ -19,7 +19,7 @@ export class OrderController {
 
   @Get()
   @ApiOperation({
-    summary: 'Listar todas as ordens',
+    summary: 'Listar todas os pedidos',
   })
   findAll() {
     return this.orderService.findAll();
@@ -27,7 +27,7 @@ export class OrderController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Visualizar uma ordem pelo ID',
+    summary: 'Visualizar um pedido pelo ID',
   })
   findOne(@Param('id') id: string) {
     return this.orderService.findOne(id);
