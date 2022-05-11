@@ -4,7 +4,8 @@ import { Injectable, Req } from '@nestjs/common';
 export class AppService {
   getAppStatus(baseUrl: string) {
     return {
-      status: `Server is running! 🚀\n Please check ${baseUrl}/api for Swagger docs...`,
+      status: `Server is running! 🚀`,
+      docs: baseUrl + '/api',
     };
   }
 }
